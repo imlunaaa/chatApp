@@ -68,7 +68,6 @@ class _BottomBarState extends State<BottomBar> with WidgetsBindingObserver {
       body: IndexedStack(index: bottomBar.currentIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: AppTheme.secondaryBackgroundColor,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: bottomBar.currentIndex == 0
@@ -96,7 +95,6 @@ class _BottomBarState extends State<BottomBar> with WidgetsBindingObserver {
           ),
         ],
         currentIndex: bottomBar.currentIndex,
-        selectedItemColor: Color(0XFF1b374d),
         onTap: bottomBar.changeIndex,
       ),
     );

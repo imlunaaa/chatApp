@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class PresenceService {
@@ -20,7 +21,8 @@ class PresenceService {
     final DocumentReference userFirestoreRef = _firestoreDatabase
         .collection('users')
         .doc(uid);
-
+    final currentUser = FirebaseAuth.instance.currentUser;
+    print('Passed uid: $uid, Auth uid: ${currentUser?.uid}');
     // 1. Listen to RTDB connectivity state
     _connectionSubscription = _firebaseDatabase
         .ref('.info/connected')

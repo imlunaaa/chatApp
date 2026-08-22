@@ -2,38 +2,54 @@ import 'dart:convert';
 import 'package:chat_app/components/show_update_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
 class AppUpdateService {
-  static final FirebaseRemoteConfig _remoteConfig =
-      FirebaseRemoteConfig.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// 1. Initialize Remote Config & Fetch Latest Values
+  // Where the update config document lives.
+  static const String _configCollection = 'config';
+  static const String _configDocId = 'app_update';
+
+  // Cached values after fetch, so we don't have to pass them around.
+  static String _latestVersion = '1.0.0';
+  static String _minRequiredVersion = '1.0.0';
+  static List<String> _changelog = ['General updates and fixes'];
+  static String _storeUrl = '';
+
+  /// 1. Fetch the update config document from Firestore.
   static Future<void> initRemoteConfig() async {
-    // Fallback defaults
-    await _remoteConfig.setDefaults(const {
-      'latest_app_version': '1.0.0',
-      'min_required_version': '1.0.0',
-      'update_changelog': '["General updates and fixes"]',
-    });
-
-    await _remoteConfig.setConfigSettings(
-      RemoteConfigSettings(
-        fetchTimeout: const Duration(seconds: 10),
-        minimumFetchInterval: const Duration(hours: 0), // 0 during debug
-      ),
-    );
-    await _remoteConfig.fetchAndActivate();
-
     try {
-      await _remoteConfig.fetchAndActivate();
+      final doc = await _firestore
+          .collection(_configCollection)
+          .doc(_configDocId)
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data()!;
+        _latestVersion =
+            data['latest_app_version'] as String? ?? _latestVersion;
+        _minRequiredVersion =
+            data['min_required_version'] as String? ?? _minRequiredVersion;
+        _storeUrl = data['apkUrl'] as String? ?? _storeUrl;
+
+        final rawChangelog = data['update_changelog'];
+        if (rawChangelog is List) {
+          _changelog = List<String>.from(rawChangelog);
+        } else if (rawChangelog is String) {
+          // In case you store it as a JSON-encoded string instead of an array.
+          try {
+            _changelog = List<String>.from(jsonDecode(rawChangelog));
+          } catch (_) {
+            _changelog = ['Bug fixes and performance improvements'];
+          }
+        }
+      }
     } catch (e) {
-      debugPrint('Failed to fetch Remote Config: $e');
+      debugPrint('Failed to fetch update config from Firestore: $e');
     }
   }
 
@@ -53,41 +69,30 @@ class AppUpdateService {
 
   /// 3. Check for available updates
   static Future<void> checkAndShowUpdateDialog(BuildContext context) async {
+    // Make sure config has been fetched at least once.
+    await initRemoteConfig();
+
     final packageInfo = await PackageInfo.fromPlatform();
     final String currentVersion = packageInfo.version;
-    print('Current app version: $currentVersion');
+    debugPrint('Current app version: $currentVersion');
 
     // Save app version to user's Firestore record
     await updateUserAppVersionInFirestore(currentVersion);
 
-    final String latestVersion = _remoteConfig.getString('latest_app_version');
-    final String minRequiredVersion = _remoteConfig.getString(
-      'min_required_version',
-    );
-    final String rawChangelog = _remoteConfig.getString('update_changelog');
-    final String storeUrl = _remoteConfig.getString('apkUrl');
-
-    List<String> changelog = [];
-    try {
-      changelog = List<String>.from(jsonDecode(rawChangelog));
-    } catch (_) {
-      changelog = ['Bug fixes and performance improvements'];
-    }
-
     final bool isForceUpdate = _isVersionLower(
       currentVersion,
-      minRequiredVersion,
+      _minRequiredVersion,
     );
-    final bool isSoftUpdate = _isVersionLower(currentVersion, latestVersion);
+    final bool isSoftUpdate = _isVersionLower(currentVersion, _latestVersion);
 
     if ((isForceUpdate || isSoftUpdate) && context.mounted) {
       showUpdateDialog(
         context: context,
         currentVersion: currentVersion,
-        newVersion: latestVersion,
-        changelog: changelog,
+        newVersion: _latestVersion,
+        changelog: _changelog,
         isForceUpdate: isForceUpdate,
-        storeUrl: storeUrl,
+        storeUrl: _storeUrl,
       );
     }
   }

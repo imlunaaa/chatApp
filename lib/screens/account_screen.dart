@@ -403,6 +403,8 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text("v${user!['appVersion']}"),
                 ],
               ),
             );
