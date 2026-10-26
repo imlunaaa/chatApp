@@ -1,6 +1,7 @@
 import 'package:chat_app/components/textformfield.dart';
 import 'package:chat_app/provider/theme_provider.dart';
 import 'package:chat_app/screens/login_screen.dart';
+import 'package:chat_app/services/app_update_service.dart';
 import 'package:chat_app/services/presence_service.dart';
 import 'package:chat_app/theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -120,6 +121,7 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Account'),
+          automaticallyImplyLeading: false,
           actions: [
             TextButton(
               style: TextButton.styleFrom(
@@ -372,7 +374,8 @@ class _AccountScreenState extends State<AccountScreen> {
                               'Check App Updates',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
-                            onTap: () {},
+                            onTap: () =>
+                                AppUpdateService.checkAndShowUpdateDialog,
                           ),
                           Divider(),
                           ListTile(

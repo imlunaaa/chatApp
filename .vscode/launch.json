@@ -31,7 +31,7 @@
       "name": "android-pixel",
       "request": "launch",
       "type": "dart",
-      "deviceId": "192.168.229.102:5555"
+      "deviceId": "192.168.45.101:5555"
     }
   ],
   "compounds": [

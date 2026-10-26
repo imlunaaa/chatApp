@@ -1,3 +1,4 @@
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:chat_app/models/chat_model.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:chat_app/screens/chat_screen.dart';
@@ -26,7 +27,6 @@ class ChatTile extends StatelessWidget {
           return const SizedBox();
         }
         final user = snapshot.data!.data() as Map<String, dynamic>;
-
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

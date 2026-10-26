@@ -4,8 +4,8 @@ import 'package:chat_app/screens/find_friends_screen.dart';
 import 'package:chat_app/screens/friends_screen.dart';
 import 'package:chat_app/screens/home_screen.dart';
 import 'package:chat_app/services/app_update_service.dart';
+import 'package:chat_app/services/notification_service.dart';
 import 'package:chat_app/services/presence_service.dart';
-import 'package:chat_app/theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +42,9 @@ class _BottomBarState extends State<BottomBar> with WidgetsBindingObserver {
         await AppUpdateService.checkAndShowUpdateDialog(context);
       }
     });
+
+    // Initialize notifications, save token to Firestore, and set up listeners
+    FirebaseNotificationService().initialize();
   }
 
   @override

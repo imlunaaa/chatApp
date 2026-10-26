@@ -79,9 +79,9 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
       // 5. Navigate to Home Screen or next flow safely
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        CupertinoPageRoute(
+        MaterialPageRoute(
           builder: (context) => BottomBar(uid: uid, userData: userData),
-        ), // Pass userData if needed
+        ),
       );
     } catch (e) {
       EasyLoading.dismiss();

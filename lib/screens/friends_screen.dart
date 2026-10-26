@@ -24,6 +24,7 @@ class _FriendScreenState extends State<FriendScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Friends'),
+          automaticallyImplyLeading: false,
           actions: [
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance

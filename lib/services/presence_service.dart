@@ -21,15 +21,15 @@ class PresenceService {
     final DocumentReference userFirestoreRef = _firestoreDatabase
         .collection('users')
         .doc(uid);
-    final currentUser = FirebaseAuth.instance.currentUser;
-    print('Passed uid: $uid, Auth uid: ${currentUser?.uid}');
+    // final currentUser = FirebaseAuth.instance.currentUser;
+    // print('Passed uid: $uid, Auth uid: ${currentUser?.uid}');
     // 1. Listen to RTDB connectivity state
     _connectionSubscription = _firebaseDatabase
         .ref('.info/connected')
         .onValue
         .listen((event) async {
           final bool isConnected = event.snapshot.value as bool? ?? false;
-          print(isConnected);
+          // print(isConnected);
 
           if (!isConnected) return;
 
@@ -51,12 +51,12 @@ class PresenceService {
 
     // 2. Mirror RTDB presence state into Firestore
     _presenceSubscription = userPresenceRef.onValue.listen((event) {
-      print("RTDB event received");
+      // print("RTDB event received");
       if (!event.snapshot.exists) return;
 
       // Safe cast for Realtime Database maps
       final rawData = event.snapshot.value;
-      print("RTDB value: ${event.snapshot.value}");
+      // print("RTDB value: ${event.snapshot.value}");
       if (rawData is! Map) return;
 
       final Map<dynamic, dynamic> data = rawData;

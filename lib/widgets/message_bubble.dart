@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/models/message_model.dart';
 import 'package:chat_app/screens/image_preview_screen.dart';
+import 'package:chat_app/screens/web_view.dart';
 import 'package:chat_app/theme/app_theme.dart';
 import 'package:chat_app/utils/cloudinary_utils.dart';
 import 'package:flutter/material.dart';
@@ -64,15 +65,51 @@ class MessageBubble extends StatelessWidget {
                   padding: _isImage
                       ? const EdgeInsets.symmetric(horizontal: 8)
                       : EdgeInsets.zero,
-                  child: Linkify(
-                    text: message.text,
-                    onOpen: _onOpenLink,
-                    style: TextStyle(color: isMe ? Colors.white : Colors.black),
-                    linkStyle: const TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
+                  child: InkWell(
+                    child: Text.rich(
+                      TextSpan(
+                        children: message.text.split(' ').map((word) {
+                          final isLink =
+                              word.startsWith('http://') ||
+                              word.startsWith('https://');
+                          return TextSpan(
+                            text: '$word ',
+                            style: TextStyle(
+                              color: isLink
+                                  ? (isMe
+                                        ? Colors.lightBlueAccent
+                                        : Colors.blue)
+                                  : (isMe ? Colors.white : Colors.black),
+                              decoration: isLink
+                                  ? TextDecoration.underline
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
+                    onTap: () {
+                      final match = RegExp(
+                        r'https?://\S+',
+                      ).firstMatch(message.text);
+                      if (match == null) return; // not a link, do nothing
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WebViewScreen(url: match.group(0)!),
+                        ),
+                      );
+                    },
                   ),
+                  // child: Linkify(
+                  //   text: message.text,
+                  //   onOpen: _onOpenLink,
+                  //   style: TextStyle(color: isMe ? Colors.white : Colors.black),
+                  //   linkStyle: const TextStyle(
+                  //     color: Colors.blue,
+                  //     decoration: TextDecoration.underline,
+                  //   ),
+                  // ),
                 ),
               SizedBox(height: _isImage ? 4 : 5),
               Padding(

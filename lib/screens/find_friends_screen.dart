@@ -82,7 +82,10 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('Find People')),
+        appBar: AppBar(
+          title: Text('Find People'),
+          automaticallyImplyLeading: false,
+        ),
         body: StreamBuilder(
           stream: FirebaseFirestore.instance.collection('users').snapshots(),
           builder: (context, asyncSnapshot) {

@@ -1,3 +1,4 @@
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:chat_app/firebase_options.dart';
 import 'package:chat_app/provider/bottom_navigation_provider.dart';
 import 'package:chat_app/provider/theme_provider.dart';
@@ -10,15 +11,38 @@ import 'package:chat_app/theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
+
+// 1. Top-level background handler function
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Check if the notification data carries a badge count
+  if (message.data.containsKey('badge_count')) {
+    try {
+      int badgeCount = int.parse(message.data['badge_count'].toString());
+      bool supported = await AppBadgePlus.isSupported();
+      if (supported) {
+        await AppBadgePlus.updateBadge(badgeCount);
+      }
+    } catch (e) {
+      print("Background badge update failed: $e");
+    }
+  }
+}
 
 final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // await FirebaseNotificationService().initialize();
+
+  // 2. Register background handler before running app
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   runApp(MainApp());
 }
 
